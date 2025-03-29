@@ -20,19 +20,20 @@ int get_int(char *prompt)
     return number;
 }
 
-void print_block(int block_amount, int padding_left, int padding_right);
+void print_row(int block_amount, int padding_left);
 
 int main(void)
 {
     int height;
     do
     {
-        height  = get_int("Height: ");
-    } while(height <= 0);
+        height = get_int("Height: ");
+    }
+    while (height <= 0);
     build_pyramid(height);
 }
 
-void print_block(int block_amount, int padding_left, int padding_right)
+void print_row(int block_amount, int padding_left)
 {
     for (int i = 0; i < padding_left; i++)
     {
@@ -41,10 +42,6 @@ void print_block(int block_amount, int padding_left, int padding_right)
     for (int i = 0; i < block_amount; i++)
     {
         printf("#");
-    }
-    for (int i = 0; i < padding_right; i++)
-    {
-        printf(" ");
     }
 }
 
@@ -62,10 +59,10 @@ void build_pyramid(int height)
 
 void build_left_pyramid(int row, int height)
 {
-    print_block(row, height - row, 1);
+    print_row(row, height - row);
 }
 
 void build_right_pyramid(int row, int height)
 {
-    print_block(row, 1, 0);
+    print_row(row, 2);
 }
