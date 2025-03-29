@@ -70,7 +70,7 @@ int calculate_coins(int cents)
         int coin_value = change[i];
         int coin_amount = cents / coin_value;
         sum += coin_amount;
-        cents -= coin_value * coin_amount;
+        cents %= coin_value; // equal to cents -= coin_value * coin_amount;
         if (cents == 0)
             break;
     }
