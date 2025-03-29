@@ -24,7 +24,11 @@ void print_block(int block_amount, int padding_left, int padding_right);
 
 int main(void)
 {
-    int height = get_int("Height: ");
+    int height;
+    do
+    {
+        height  = get_int("Height: ");
+    } while(height <= 0);
     build_pyramid(height);
 }
 
