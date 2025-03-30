@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool validate_creditcard(long card_number);
-int get_first_two_digits(long number);
 char *get_card_carrier(int digits); 
+int get_first_two_digits(long number);
+bool validate_creditcard(long card_number);
 
 char *get_string(const char *prompt)
 {
