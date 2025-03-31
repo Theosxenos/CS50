@@ -108,53 +108,35 @@ bool validate_creditcard(long card_number)
     long card_number_shortened = card_number;
     int counter = 0;
     long digit_sequence_sum = 0;
-    long evenDigitSequence = 0;
-    long unevenDigitSequence = 0;
 
     while (card_number_shortened > 0)
     {
-        long lastDigit = card_number_shortened % 10;
+        long last_digit = card_number_shortened % 10;
 
+        // Uneven digits
         if (counter % 2 == 0)
         {
-            unevenDigitSequence *= 10;
-            unevenDigitSequence += lastDigit;
+            digit_sequence_sum += last_digit;
         }
+        // Even digits
         else
         {
-            evenDigitSequence *= 10;
-            evenDigitSequence += lastDigit;
+            int last_digit_product = last_digit * 2;
+
+            // Products of the every other digit needs to be counted as individual digits not its sum
+            if(last_digit_product >= 10)
+            {
+                int split_product_digit = last_digit_product % 10;
+                digit_sequence_sum += split_product_digit;
+                // Make it single digit
+                last_digit_product /= 10;
+            }
+
+            digit_sequence_sum += last_digit_product;
         }
 
         card_number_shortened /= 10;
         counter++;
-    }
-
-    while (evenDigitSequence > 0)
-    {
-        long lastDigit = evenDigitSequence % 10;
-        long lastDigitProduct = lastDigit * 2;
-
-        /* Because card numbers are based on a decimal system, the highest digit is 9.
-         * Therefore the highest possible number is 18, which is 2 digits and starts with 1
-         * So if divided by ten equals 1 it means the product is 10 or higher and we need to split
-         * it
-         */
-        if (lastDigitProduct / 10 == 1)
-        {
-            digit_sequence_sum += lastDigitProduct % 10;
-            lastDigitProduct /= 10;
-        }
-
-        digit_sequence_sum += lastDigitProduct;
-        evenDigitSequence /= 10;
-    }
-
-    while (unevenDigitSequence > 0)
-    {
-        long lastDigit = unevenDigitSequence % 10;
-        digit_sequence_sum += lastDigit;
-        unevenDigitSequence /= 10;
     }
 
     return digit_sequence_sum % 10 == 0;
@@ -177,13 +159,10 @@ char *get_card_carrier(int digits)
         return "AMEX\n";
     }
 
-    for(int i = 51; i <= 55; i++)
-    {
-        if(digits == i)
-        {
-            return "MASTERCARD\n";
-        }
-    }
+   if (digits >= 51 && digits <= 55) 
+{
+       return "MASTERCARD\n";
+   }
 
     if(digits / 10 == 4)
     {
