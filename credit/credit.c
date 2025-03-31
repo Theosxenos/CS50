@@ -1,112 +1,48 @@
-// #include <cs50.h>
+#include <cs50.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-char *get_card_carrier(int digits); 
+string get_card_carrier(long card_number);
 int get_first_two_digits(long number);
+bool validate_creditcard(long card_number);
 bool validate_creditcard_number(long card_number);
-
-char *get_string(const char *prompt)
-{
-    printf("%s", prompt); // Print the prompt
-
-    // Allocate initial buffer
-    size_t buffer_size = 128;
-    char *buffer = malloc(buffer_size);
-    if (buffer == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    size_t i = 0; // Current position in buffer
-    int ch;
-
-    // Read input character by character
-    while ((ch = getchar()) != EOF && ch != '\n' && ch != '\r')
-    {
-        // Resize buffer if necessary
-        if (i + 1 >= buffer_size)
-        {
-            buffer_size *= 2;
-            char *new_buffer = realloc(buffer, buffer_size);
-            if (new_buffer == NULL)
-            {
-                free(buffer);
-                fprintf(stderr, "Memory reallocation failed\n");
-                exit(EXIT_FAILURE);
-            }
-            buffer = new_buffer;
-        }
-
-        buffer[i++] = ch;
-    }
-
-    // Handle CRLF (\r\n)
-    if (ch == '\r' && (ch = getchar()) != '\n' && ch != EOF)
-    {
-        ungetc(ch, stdin);
-    }
-
-    buffer[i] = '\0'; // Null-terminate the string
-
-    // Resize buffer to fit the exact string size
-    char *result = realloc(buffer, i + 1);
-    if (result == NULL)
-    {
-        free(buffer);
-        fprintf(stderr, "Memory reallocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return result;
-}
-
-long get_long(const char *prompt)
-{
-    while (true)
-    {
-        char *input = get_string(prompt);  // Changed string to char*
-        if (input == NULL)
-        {
-            continue;
-        }
-
-        char *endptr;
-        long value = strtol(input, &endptr, 10);
-
-        // Check if the entire input was successfully converted to a long
-        if (*endptr == '\0' && !(value == LONG_MIN || value == LONG_MAX))
-        {
-            free(input);  // Free the allocated memory
-            return value;
-        }
-
-        free(input);  // Free the allocated memory
-        printf("Invalid number. Please try again.\n");
-    }
-}
+bool validate_creditcard_number_for_carrier(string carrier, long card_number);
 
 int main(void)
 {
     long card_number = get_long("Number: ");
+    validate_creditcard(card_number);
+}
+
+bool validate_creditcard(long card_number)
+{
+    string invalid_Carrier = "INVALID";
 
     if (!validate_creditcard_number(card_number))
     {
-        printf("%s", "INVALID\n");
-        return 0;
+        printf("%s\n", invalid_Carrier);
+        return false;
     }
-    
-    int first_two_digits = get_first_two_digits(card_number);
-    printf("%s", get_card_carrier(first_two_digits));
+
+    string carrier = get_card_carrier(card_number);
+    bool is_card_length_valid = validate_creditcard_number_for_carrier(carrier, card_number);
+
+    if (is_card_length_valid)
+    {
+        printf("%s\n", carrier);
+        return true;
+    }
+
+    printf("%s\n", invalid_Carrier);
+    return false;
 }
 
 bool validate_creditcard_number(long card_number)
 {
     long card_number_shortened = card_number;
-    int counter = 0;
+    bool uneven = true;
     long digit_sequence_sum = 0;
 
     while (card_number_shortened > 0)
@@ -114,7 +50,7 @@ bool validate_creditcard_number(long card_number)
         long last_digit = card_number_shortened % 10;
 
         // Uneven digits
-        if (counter % 2 == 0)
+        if (uneven)
         {
             digit_sequence_sum += last_digit;
         }
@@ -123,8 +59,9 @@ bool validate_creditcard_number(long card_number)
         {
             int last_digit_product = last_digit * 2;
 
-            // Products of the every other digit needs to be counted as individual digits not its sum
-            if(last_digit_product >= 10)
+            // Products of the every other digit needs to be counted as individual digits not its
+            // sum
+            if (last_digit_product >= 10)
             {
                 int split_product_digit = last_digit_product % 10;
                 digit_sequence_sum += split_product_digit;
@@ -136,40 +73,69 @@ bool validate_creditcard_number(long card_number)
         }
 
         card_number_shortened /= 10;
-        counter++;
+        uneven = !uneven;
     }
-
-    printf("Sum %i", digit_sequence_sum);
 
     return digit_sequence_sum % 10 == 0;
 }
 
+bool validate_creditcard_number_for_carrier(string carrier, long card_number)
+{
+    string amex = "AMEX";
+    string master = "MASTERCARD";
+    string visa = "VISA";
+
+    int card_length = 0;
+    while (card_number > 0)
+    {
+        card_number /= 10;
+        card_length++;
+    }
+
+    if (carrier == amex && card_length == 15)
+    {
+        return true;
+    }
+    else if (carrier == master && card_length == 16)
+    {
+        return true;
+    }
+    else if (carrier == visa && (card_length == 13 || card_length == 16))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 int get_first_two_digits(long card_number)
 {
-	while (card_number >= 100)
-	{
+    while (card_number >= 100)
+    {
         card_number /= 10;
-	}
+    }
 
     return card_number;
 }
 
-char *get_card_carrier(int digits)
+string get_card_carrier(long card_number)
 {
-    if(digits == 34 || digits == 37)
+    int digits = get_first_two_digits(card_number);
+
+    if (digits == 34 || digits == 37)
     {
-        return "AMEX\n";
+        return "AMEX";
     }
 
-   if (digits >= 51 && digits <= 55) 
-{
-       return "MASTERCARD\n";
-   }
-
-    if(digits / 10 == 4)
+    if (digits >= 51 && digits <= 55)
     {
-        return "VISA\n";
+        return "MASTERCARD";
     }
 
-    return "INVALID\n";
+    if (digits / 10 == 4)
+    {
+        return "VISA";
+    }
+
+    return "INVALID";
 }
