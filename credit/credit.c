@@ -6,7 +6,7 @@
 
 char *get_card_carrier(int digits); 
 int get_first_two_digits(long number);
-bool validate_creditcard(long card_number);
+bool validate_creditcard_number(long card_number);
 
 char *get_string(const char *prompt)
 {
@@ -93,17 +93,17 @@ int main(void)
 {
     long card_number = get_long("Number: ");
 
-    if (!validate_creditcard(card_number))
+    if (!validate_creditcard_number(card_number))
     {
         printf("%s", "INVALID\n");
-        return 1;
+        return 0;
     }
     
     int first_two_digits = get_first_two_digits(card_number);
     printf("%s", get_card_carrier(first_two_digits));
 }
 
-bool validate_creditcard(long card_number)
+bool validate_creditcard_number(long card_number)
 {
     long card_number_shortened = card_number;
     int counter = 0;
@@ -138,6 +138,8 @@ bool validate_creditcard(long card_number)
         card_number_shortened /= 10;
         counter++;
     }
+
+    printf("Sum %i", digit_sequence_sum);
 
     return digit_sequence_sum % 10 == 0;
 }
