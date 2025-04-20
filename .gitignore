@@ -1,3 +1,9 @@
 .idea/
 .vscode/
 Examples/
+
+*.bmp
+*.txt
+*.db
+*.raw
+cs50.*
